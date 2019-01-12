@@ -1,2 +1,2 @@
 # usa_airline_viz
-Shiny applications to visualize data on airports, airlines and flight routes in the United States in 2008
+Visualizations of the United States airports and airlines dataset using R Shiny and Leaflet in order to better understand the cancellation and delay metrics across airports, airlines and flight routes.
