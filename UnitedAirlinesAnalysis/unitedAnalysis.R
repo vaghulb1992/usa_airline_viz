@@ -55,16 +55,30 @@ colnames(delay_aggs) <- c("UniqueCarrier", "Departure Delay", "Arrival Delay", "
 rownames(delay_aggs) <- delay_aggs$UniqueCarrier
 delay_aggs$UniqueCarrier <- NULL
 delay_aggs <- delay_aggs[c('UA', 'DL', 'US', 'MQ'), ]
-barplot(t(t(delay_aggs)), beside = TRUE, legend = TRUE, ylab = "Delay (in mins)", xlab = "Delay Type",
-        axes = FALSE, axisnames = FALSE, main = "Delay distribution for competing airlines", ylim = c(0, 7000000),
+for (i in 1:nrow(delay_aggs))
+{
+  carrier <- rownames(delay_aggs)[i]
+  flight_freq <- agg_data[carrier, ]$freq
+  delay_aggs[i, ] <- delay_aggs[i, ]/flight_freq
+}
+barplot(t(t(delay_aggs)), beside = TRUE, legend = TRUE, ylab = "Delay per flight (in mins)", xlab = "Delay Type",
+        axes = FALSE, axisnames = FALSE, main = "Delay distribution for competing airlines", ylim = c(0, 14),
         col = c("orangered4", "midnightblue", "goldenrod3", "chartreuse4"))
-axis(side = 2, labels = FALSE)
-options(scipen=999)
-angleAxis(side = 2, labels = seq(0, 7000000, 1000000)/1000, at = seq(0, 7000000, 1000000), srt = 45, cex = 0.75)
+axis(side = 2, labels = seq(0, 14, 2), at = seq(0, 14, 2), cex = 0.75, las = 2)
 angleAxis(side = 1, at = seq(4, 29, 5), labels = colnames(delay_aggs), srt = 45, cex = 0.75)
 box()
 
 #################################################################################################################
-# Section III
+# Departure delay per flight per airport for United against its competitors
 #################################################################################################################
+
+dep_by_airport <- aggregate(air$DepDelay, by=list(air$Origin, air$UniqueCarrier), FUN = sum, na.rm = TRUE)
+colnames(dep_by_airport) <- c("Origin", "Carrier", "DepDelay")
+counts <- count(air, c("Origin", "UniqueCarrier"))
+colnames(counts) <- c("Origin","Carrier", "freq")
+dep_by_airport <- join(dep_by_airport, counts)
+dep_by_airport <- dep_by_airport[order(dep_by_airport$DepDelay, decreasing = "TRUE" ), ]
+dep_by_airport$perFlightDelay <- dep_by_airport$DepDelay/dep_by_airport$freq
+dep_airports <- head(dep_by_airport[dep_by_airport$Carrier == "UA", ], 5)
+dep_airports <- as.character(dep_airports$Origin)
 
