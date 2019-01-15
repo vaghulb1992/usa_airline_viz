@@ -101,7 +101,7 @@ ord_data <- data.frame(DepDelay = ord_dep_subset[order(ord_dep_subset$Carrier), 
 rownames(ord_data) <- ord_airlines[order(ord_airlines)]
 barplot(t(t(ord_data)), beside = TRUE, legend = TRUE,  ylab = "Delay per flight (in mins)",
         xlab = "Delay Type", axes = FALSE, axisnames = FALSE, ylim = c(0, 24),
-        col = c("orangered4", "midnightblue", "goldenrod3", "grey37", "chartreuse4"), 
+        col = c("orangered4", "midnightblue", "goldenrod3", "grey37", "chartreuse4"),
         main = "ORD airport delay distribution per airline (Top 5)",
         args.legend = list(x="bottomright"))
 axis(side = 2, labels = seq(0, 24, 2), at = seq(0, 24, 2), cex = 0.75, las = 2)
@@ -117,7 +117,7 @@ den_data <- data.frame(DepDelay = den_dep_subset[order(den_dep_subset$Carrier), 
 rownames(den_data) <- den_airlines[order(den_airlines)]
 barplot(t(t(den_data)), beside = TRUE, legend = TRUE,  ylab = "Delay per flight (in mins)",
         xlab = "Delay Type", axes = FALSE, axisnames = FALSE, ylim = c(0, 16),
-        col = c("orangered4", "midnightblue", "goldenrod3", "grey37", "chartreuse4"), 
+        col = c("orangered4", "midnightblue", "grey37", "goldenrod3", "chartreuse4"),
         main = "DEN airport delay distribution per airline (Top 5)",
         args.legend = list(x="topright"))
 axis(side = 2, labels = seq(0, 16, 2), at = seq(0, 16, 2), cex = 0.75, las = 2)
