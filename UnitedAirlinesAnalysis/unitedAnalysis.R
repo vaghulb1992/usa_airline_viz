@@ -108,6 +108,8 @@ barplot(t(t(ord_data)), beside = TRUE, ylab = "Delay per flight (in mins)",
 axis(side = 2, labels = seq(0, 24, 2), at = seq(0, 24, 2), cex = 0.75, las = 2)
 axis(side = 1, at = c(4, 10), labels = c("Departure", "Arrival"))
 legend("bottomright", legend = rownames(ord_data), fill = colours, ncol = 5)
+text(2.5, 13.9, labels = round(ord_data['MQ', 'DepDelay'], 2), font = 2)
+text(4.5, 20.0, labels = round(ord_data['UA', 'DepDelay'], 2), font = 2)
 box()
 
 # barplot for DEN airport
@@ -117,14 +119,15 @@ den_arr_subset <- subset(arr_by_airport, arr_by_airport$Carrier %in% den_airline
 den_data <- data.frame(DepDelay = den_dep_subset[order(den_dep_subset$Carrier), ]$perFlightDelay,
                        ArrDelay = den_arr_subset[order(den_arr_subset$Carrier), ]$perFlightDelay)
 rownames(den_data) <- den_airlines[order(den_airlines)]
-colours<-c("orangered4", "midnightblue", "grey37", "goldenrod3", "chartreuse4")
-barplot(t(t(den_data)), beside = TRUE,  ylab = "Delay per flight (in mins)",
+colours <- c("orangered4", "midnightblue", "grey37", "goldenrod3", "chartreuse4")
+barplot(t(t(den_data)), beside = TRUE, ylab = "Delay per flight (in mins)",
         xlab = "Delay Type", axes = FALSE, axisnames = FALSE, ylim = c(0, 16),
-        col = colours,
-        main = "DEN airport delay distribution per airline (Top 5)")
+        col = colours, main = "DEN airport delay distribution per airline (Top 5)")
 axis(side = 2, labels = seq(0, 16, 2), at = seq(0, 16, 2), cex = 0.75, las = 2)
 axis(side = 1, at = c(4, 10), labels = c("Departure", "Arrival"))
-legend('topright',legend=rownames((den_data)), fill=colours, ncol=5)
+legend('topright', legend = rownames((den_data)), fill = colours, ncol = 5)
+text(2.5, 6.0, labels = round(den_data['OO', 'DepDelay'], 2), font = 2)
+text(3.5, 15.7, labels = round(den_data['UA', 'DepDelay'], 2), font = 2)
 box()
 
 #################################################################################################################
