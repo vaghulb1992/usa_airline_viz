@@ -9,38 +9,42 @@ library(gplots)
 # Finding United's competitors
 #################################################################################################################
 
+# loading in the airline data
 air <- read.csv("air.csv")
 
-#Add a columnn for total delay
-air$TotalDelay<-air$ArrDelay+air$DepDelay
+# Add a columnn for total delay
+air$TotalDelay <- air$ArrDelay + air$DepDelay
 
-#Aggregate TotalDelay by Carrier
-agg_data<-aggregate(air$TotalDelay, by=list(air$UniqueCarrier), FUN=sum, na.rm=TRUE)
+# Aggregate TotalDelay by Carrier
+agg_data <- aggregate(air$TotalDelay, by = list(air$UniqueCarrier), FUN = sum, na.rm = TRUE)
 
-#Replace Column names
-colnames(agg_data)<-c("UniqueCarrier", "TotalDelay")
+# Replace Column names
+colnames(agg_data) <- c("UniqueCarrier", "TotalDelay")
 
-#Get total number of flights per carrier
-df<-count(air, "UniqueCarrier")
-
-#Join the two dat frames
-agg_data<-join(agg_data, df)
+# Join the two dat frames
+agg_data <- join(agg_data, count(air, "UniqueCarrier"))
 
 #Sort the data by Frequency
-agg_data<-agg_data[order(agg_data$freq),]
-agg_data$perFlightDelay<-agg_data$TotalDelay/agg_data$freq
-plot(agg_data$freq, agg_data$perFlightDelay,
-     xlab="Number of Flights",
-     ylab="Average Delay per Flight (minutes)",
-     xlim=c(0,1300000), ylim=c(0,30))
+agg_data <- agg_data[order(agg_data$freq),]
 
-#text(agg_data$freq+50000, agg_data$perFlightDelay, agg_data$UniqueCarrier)
-com_data<-subset(agg_data, agg_data$UniqueCarrier!=c("UA","MQ", "DL", "US"))
-text(com_data$freq+50000, com_data$perFlightDelay, com_data$UniqueCarrier)
-title("Total Flight Delay Comparision")
-mtext('Benchmarking American Airlines', side=3, line=0)
-aa_data<-agg_data[agg_data$UniqueCarrier=="UA",]
-text(aa_data$freq +50000, aa_data$freq, "BA", col = "Red")
+# plotting frequency vs delay per flight
+agg_data$perFlightDelay <- agg_data$TotalDelay/agg_data$freq
+rownames(agg_data) <- agg_data$UniqueCarrier
+agg_data$UniqueCarrier <- NULL
+plot(agg_data$freq, agg_data$perFlightDelay,
+     xlab = "Number of flights",
+     ylab = "Average delay per Flight (in mins)",
+     xlim = c(0, 1300000), ylim = c(0, 30), pch = " ")
+text(agg_data[-which(rownames(agg_data) %in% c("UA","MQ", "DL", "US")), ]$freq + 5000,
+     agg_data[-which(rownames(agg_data) %in% c("UA","MQ", "DL", "US")), ]$perFlightDelay,
+     rownames(agg_data[-which(rownames(agg_data) %in% c("UA","MQ", "DL", "US")), ]), cex = 0.75, font = 2)
+text(agg_data[which(rownames(agg_data) %in% c("UA","MQ", "DL", "US")), ]$freq + 5000,
+     agg_data[which(rownames(agg_data) %in% c("UA","MQ", "DL", "US")), ]$perFlightDelay,
+     rownames(agg_data[which(rownames(agg_data) %in% c("UA","MQ", "DL", "US")), ]), col = 2, font = 2)
+rect(xleft = (agg_data[which(rownames(agg_data) == "US"), ]$freq - 45000), ybottom = (agg_data[which(rownames(agg_data) == "US"), ]$perFlightDelay) - 3,
+     xright = (agg_data[which(rownames(agg_data) == "US"), ]$freq + 85000), ytop = (agg_data[which(rownames(agg_data) == "UA"), ]$perFlightDelay) + 3,
+     lwd = 0.9, border = 2)
+title("Catching the culprit - United Airlines")
 
 #################################################################################################################
 # Delay distribution for United against its competitors
