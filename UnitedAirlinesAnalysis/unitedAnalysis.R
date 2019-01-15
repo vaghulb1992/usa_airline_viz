@@ -69,9 +69,10 @@ angleAxis(side = 1, at = seq(4, 29, 5), labels = colnames(delay_aggs), srt = 45,
 box()
 
 #################################################################################################################
-# Departure delay per flight per airport for United against its competitors
+# Departure and arrival delays at ORD and DEN airports for United airlines against its competitors
 #################################################################################################################
 
+# obtaining the departure delays per airport per airline
 dep_by_airport <- aggregate(air$DepDelay, by=list(air$Origin, air$UniqueCarrier), FUN = sum, na.rm = TRUE)
 colnames(dep_by_airport) <- c("Origin", "Carrier", "DepDelay")
 counts <- count(air, c("Origin", "UniqueCarrier"))
@@ -79,6 +80,45 @@ colnames(counts) <- c("Origin","Carrier", "freq")
 dep_by_airport <- join(dep_by_airport, counts)
 dep_by_airport <- dep_by_airport[order(dep_by_airport$DepDelay, decreasing = "TRUE" ), ]
 dep_by_airport$perFlightDelay <- dep_by_airport$DepDelay/dep_by_airport$freq
-dep_airports <- head(dep_by_airport[dep_by_airport$Carrier == "UA", ], 5)
-dep_airports <- as.character(dep_airports$Origin)
+comp_airports <- as.character(head(dep_by_airport[dep_by_airport$Carrier == "UA", ], 2)$Origin)
 
+# obtaining the arrival delays per airport per airline
+arr_by_airport <- aggregate(air$ArrDelay, by=list(air$Dest, air$UniqueCarrier), FUN = sum, na.rm = TRUE)
+colnames(arr_by_airport) <- c("Dest", "Carrier", "ArrDelay")
+counts <- count(air, c("Dest", "UniqueCarrier"))
+colnames(counts) <- c("Dest","Carrier", "freq")
+arr_by_airport <- join(arr_by_airport, counts)
+arr_by_airport <- arr_by_airport[order(arr_by_airport$ArrDelay, decreasing = "TRUE" ), ]
+arr_by_airport$perFlightDelay <- arr_by_airport$ArrDelay/arr_by_airport$freq
+comp_airports <- as.character(head(arr_by_airport[arr_by_airport$Carrier == "UA", ], 2)$Dest)
+
+# barplot for ORD airport
+ord_airlines <- as.character(head(subset(dep_by_airport, dep_by_airport$Origin == "ORD"), 5)$Carrier)
+ord_dep_subset <- subset(dep_by_airport, dep_by_airport$Carrier %in% ord_airlines & dep_by_airport$Origin == "ORD")
+ord_arr_subset <- subset(arr_by_airport, arr_by_airport$Carrier %in% ord_airlines & arr_by_airport$Dest == "ORD")
+ord_data <- data.frame(DepDelay = ord_dep_subset[order(ord_dep_subset$Carrier), ]$perFlightDelay,
+                       ArrDelay = ord_arr_subset[order(ord_arr_subset$Carrier), ]$perFlightDelay)
+rownames(ord_data) <- ord_airlines[order(ord_airlines)]
+barplot(t(t(ord_data)), beside = TRUE, legend = TRUE,  ylab = "Delay per flight (in mins)",
+        xlab = "Delay Type", axes = FALSE, axisnames = FALSE, ylim = c(0, 24),
+        col = c("orangered4", "midnightblue", "goldenrod3", "grey37", "chartreuse4"), main = "ORD airport delay distribution per airline (Top 5)")
+axis(side = 2, labels = seq(0, 24, 2), at = seq(0, 24, 2), cex = 0.75, las = 2)
+axis(side = 1, at = c(4, 10), labels = c("Departure", "Arrival"))
+box()
+
+# barplot for DEN airport
+den_airlines <- as.character(head(subset(dep_by_airport, dep_by_airport$Origin == "DEN"), 5)$Carrier)
+den_dep_subset <- subset(dep_by_airport, dep_by_airport$Carrier %in% den_airlines & dep_by_airport$Origin == "DEN")
+den_arr_subset <- subset(arr_by_airport, arr_by_airport$Carrier %in% den_airlines & arr_by_airport$Dest == "DEN")
+den_data <- data.frame(DepDelay = den_dep_subset[order(den_dep_subset$Carrier), ]$perFlightDelay,
+                       ArrDelay = den_arr_subset[order(den_arr_subset$Carrier), ]$perFlightDelay)
+rownames(den_data) <- den_airlines[order(den_airlines)]
+barplot(t(t(den_data)), beside = TRUE, legend = TRUE,  ylab = "Delay per flight (in mins)",
+        xlab = "Delay Type", axes = FALSE, axisnames = FALSE, ylim = c(0, 16),
+        col = c("orangered4", "midnightblue", "goldenrod3", "grey37", "chartreuse4"), main = "DEN airport delay distribution per airline (Top 5)")
+axis(side = 2, labels = seq(0, 16, 2), at = seq(0, 16, 2), cex = 0.75, las = 2)
+axis(side = 1, at = c(4, 10), labels = c("Departure", "Arrival"))
+box()
+
+#################################################################################################################
+#################################################################################################################
