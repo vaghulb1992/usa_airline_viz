@@ -44,7 +44,8 @@ text(agg_data[which(rownames(agg_data) %in% c("UA","MQ", "DL", "US")), ]$freq + 
 rect(xleft = (agg_data[which(rownames(agg_data) == "US"), ]$freq - 45000), ybottom = (agg_data[which(rownames(agg_data) == "US"), ]$perFlightDelay) - 3,
      xright = (agg_data[which(rownames(agg_data) == "US"), ]$freq + 85000), ytop = (agg_data[which(rownames(agg_data) == "UA"), ]$perFlightDelay) + 3,
      lwd = 0.9, border = 2)
-title("Catching the culprit - United Airlines")
+title("Average Delay per Flight vs Volume")
+mtext("Comparing United Airlines(UA) to comparable volume competitors")
 
 #################################################################################################################
 # Delay distribution for United against its competitors
@@ -62,13 +63,16 @@ for (i in 1:nrow(delay_aggs))
   delay_aggs[i, ] <- delay_aggs[i, ]/flight_freq
 }
 colours <- c("orangered4", "midnightblue", "goldenrod3", "chartreuse4")
+
 barplot(t(t(delay_aggs)), beside = TRUE, ylab = "Delay per flight (in mins)", xlab = "Delay Type",
-        axes = FALSE, axisnames = FALSE, main = "Delay distribution for competing airlines", ylim = c(0, 14),
-        col = c("orangered4", "midnightblue", "goldenrod3", "chartreuse4"))
+        axes = FALSE, axisnames = FALSE, main = "Delay per flight by Delay Type", ylim = c(0, 14), legend=TRUE,
+        args.legend = list(horiz=TRUE, cex=1.5)
+        #,col = c("orangered4", "midnightblue", "goldenrod3", "chartreuse4")
+        )
 axis(side = 2, labels = seq(0, 14, 2), at = seq(0, 14, 2), cex = 0.75, las = 2)
 angleAxis(side = 1, at = seq(4, 29, 5), labels = colnames(delay_aggs), srt = 45, cex = 0.75)
-legend("topright", legend = rownames(delay_aggs), fill = colours, ncol = 4)
 box()
+mtext("Comparing United Airlines(UA) to comparable volume competitors")
 
 #################################################################################################################
 # Departure and arrival delays at ORD and DEN airports for United airlines against its competitors
@@ -84,51 +88,38 @@ dep_by_airport <- dep_by_airport[order(dep_by_airport$DepDelay, decreasing = "TR
 dep_by_airport$perFlightDelay <- dep_by_airport$DepDelay/dep_by_airport$freq
 comp_airports <- as.character(head(dep_by_airport[dep_by_airport$Carrier == "UA", ], 2)$Origin)
 
-# obtaining the arrival delays per airport per airline
-arr_by_airport <- aggregate(air$ArrDelay, by=list(air$Dest, air$UniqueCarrier), FUN = sum, na.rm = TRUE)
-colnames(arr_by_airport) <- c("Dest", "Carrier", "ArrDelay")
-counts <- count(air, c("Dest", "UniqueCarrier"))
-colnames(counts) <- c("Dest","Carrier", "freq")
-arr_by_airport <- join(arr_by_airport, counts)
-arr_by_airport <- arr_by_airport[order(arr_by_airport$ArrDelay, decreasing = "TRUE" ), ]
-arr_by_airport$perFlightDelay <- arr_by_airport$ArrDelay/arr_by_airport$freq
-comp_airports <- as.character(head(arr_by_airport[arr_by_airport$Carrier == "UA", ], 2)$Dest)
-
 # barplot for ORD airport
 ord_airlines <- as.character(head(subset(dep_by_airport, dep_by_airport$Origin == "ORD"), 5)$Carrier)
 ord_dep_subset <- subset(dep_by_airport, dep_by_airport$Carrier %in% ord_airlines & dep_by_airport$Origin == "ORD")
-ord_arr_subset <- subset(arr_by_airport, arr_by_airport$Carrier %in% ord_airlines & arr_by_airport$Dest == "ORD")
-ord_data <- data.frame(DepDelay = ord_dep_subset[order(ord_dep_subset$Carrier), ]$perFlightDelay,
-                       ArrDelay = ord_arr_subset[order(ord_arr_subset$Carrier), ]$perFlightDelay)
+ord_data <- data.frame(DepDelay = ord_dep_subset[order(ord_dep_subset$Carrier), ]$perFlightDelay)
 rownames(ord_data) <- ord_airlines[order(ord_airlines)]
-colours <- c("orangered4", "midnightblue", "goldenrod3", "grey37", "chartreuse4")
-barplot(t(t(ord_data)), beside = TRUE, ylab = "Delay per flight (in mins)",
-        xlab = "Delay Type", axes = FALSE, axisnames = FALSE, ylim = c(0, 24),
-        col = colours, main = "ORD airport delay distribution per airline (Top 5)")
+barplot(t(t(ord_data)), beside = TRUE, ylab = "Departure Delay per flight (in mins)",
+        xlab = "Airline", axes = FALSE, axisnames = FALSE, ylim = c(0, 24), 
+        main = "Departure Delay for Top 5 Airlines at ORD Airport")
 axis(side = 2, labels = seq(0, 24, 2), at = seq(0, 24, 2), cex = 0.75, las = 2)
-axis(side = 1, at = c(4, 10), labels = c("Departure", "Arrival"))
-legend("bottomright", legend = rownames(ord_data), fill = colours, ncol = 5)
-text(2.5, 13.9, labels = round(ord_data['MQ', 'DepDelay'], 2), font = 2)
-text(4.5, 20.0, labels = round(ord_data['UA', 'DepDelay'], 2), font = 2)
+axis(side = 1, at = seq(1.5, 5.5,1), labels = rownames(ord_data), font=2)
+text(2.5, 14.5, labels = round(ord_data['MQ', 'DepDelay'], 2), font = 2, cex=1.5)
+text(4.5, 20.6, labels = round(ord_data['UA', 'DepDelay'], 2), font = 2, cex=1.5)
 box()
+segments(y0=round(ord_data['UA', 'DepDelay'], 2), x0=4,5, x1=2.5, y1=round(ord_data['UA', 'DepDelay'], 2), col = 'red')
+arrows(x0=2.85, y0=round(ord_data['UA', 'DepDelay'], 2),x1=2.85, y1=round(ord_data['MQ', 'DepDelay'], 2), col='red')
+text(3,16,'6', col='red', cex=1.5, font=2)
 
 # barplot for DEN airport
 den_airlines <- as.character(head(subset(dep_by_airport, dep_by_airport$Origin == "DEN"), 5)$Carrier)
 den_dep_subset <- subset(dep_by_airport, dep_by_airport$Carrier %in% den_airlines & dep_by_airport$Origin == "DEN")
-den_arr_subset <- subset(arr_by_airport, arr_by_airport$Carrier %in% den_airlines & arr_by_airport$Dest == "DEN")
-den_data <- data.frame(DepDelay = den_dep_subset[order(den_dep_subset$Carrier), ]$perFlightDelay,
-                       ArrDelay = den_arr_subset[order(den_arr_subset$Carrier), ]$perFlightDelay)
+den_data <- data.frame(DepDelay = den_dep_subset[order(den_dep_subset$Carrier), ]$perFlightDelay)
 rownames(den_data) <- den_airlines[order(den_airlines)]
-colours <- c("orangered4", "midnightblue", "grey37", "goldenrod3", "chartreuse4")
-barplot(t(t(den_data)), beside = TRUE, ylab = "Delay per flight (in mins)",
-        xlab = "Delay Type", axes = FALSE, axisnames = FALSE, ylim = c(0, 16),
-        col = colours, main = "DEN airport delay distribution per airline (Top 5)")
+barplot(t(t(den_data)), beside = TRUE, ylab = "Departure Delay per flight (in mins)",
+        xlab = "Airline", axes = FALSE, axisnames = FALSE, ylim = c(0, 18),
+        main = "Departure Delay for Top 5 Airlines at DEN Airport")
 axis(side = 2, labels = seq(0, 16, 2), at = seq(0, 16, 2), cex = 0.75, las = 2)
-axis(side = 1, at = c(4, 10), labels = c("Departure", "Arrival"))
-legend('topright', legend = rownames((den_data)), fill = colours, ncol = 5)
-text(2.5, 6.0, labels = round(den_data['OO', 'DepDelay'], 2), font = 2)
-text(3.5, 15.7, labels = round(den_data['UA', 'DepDelay'], 2), font = 2)
+axis(side = 1, at = seq(1.5, 5.5,1), labels = rownames(den_data), font=2)
+text(2.5, 6.6, labels = round(den_data['OO', 'DepDelay'], 2), font = 2, cex=1.5)
+text(3.5, 16.3, labels = round(den_data['UA', 'DepDelay'], 2), font = 2, cex=1.5)
 box()
-
+segments(y0=round(den_data['UA', 'DepDelay'], 2), x0=3,5, x1=2.5, y1=round(den_data['UA', 'DepDelay'], 2), col = 'red')
+arrows(x0=2.85, y0=round(den_data['UA', 'DepDelay'], 2),x1=2.85, y1=round(den_data['OO', 'DepDelay'], 2), col='red')
+text(2.7, 11,'9.7', col='red', cex=1.5, font=2)
 #################################################################################################################
 #################################################################################################################
