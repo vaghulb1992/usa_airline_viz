@@ -5,8 +5,8 @@ library(DT)
 server <- function(input, output){
   output$airport_map <- renderLeaflet({
     # including the source files for the datasets
-    source("airports.R")
-    source("cancellations.R")
+    source("https://raw.githubusercontent.com/vaghulb1992/usa_airline_viz/master/data/airports.R")
+    source("https://raw.githubusercontent.com/vaghulb1992/usa_airline_viz/master/data/cancellations.R")
 
     # subsetting the datasets based on flight and departure counts
     airports <- subset(airports, airports$NDepartures >= input$dep_count[1] & airports$NDepartures <= input$dep_count[2])

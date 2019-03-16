@@ -5,7 +5,7 @@ library(gplots)
 
 ui <- fluidPage(
   headerPanel("Which are the best/worst airports and flight routes? (based on cancellations)"),
-  leafletOutput("airport_map", height = 700),
+  leafletOutput("airport_map", height = 400),
   sidebarPanel(
     sliderInput("dep_count", "No. of departures per airport", min=1, max=411964, value=c(3000, 300000)),
     sliderInput("route_count", "No. of flights per route", min=1, max=13787, value=c(5000, 10000))
