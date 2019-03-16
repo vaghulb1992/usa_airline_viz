@@ -5,9 +5,9 @@ account: vaghulb
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 793702
-bundleId: 1943777
+bundleId: 1943789
 url: https://vaghulb.shinyapps.io/usa_airline_viz/
-when: 1552701276.91716
+when: 1552702016.1634
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: data/airports.R|data/cancellations.R
