@@ -4,9 +4,8 @@ library(gplots)
 library(leaflet)
 
 ui <- fluidPage(
-  titlePanel("USA Airports & Airlines Analysis"),
+  titlePanel("The best and worst airports and flight routes in USA", windowTitle = "USA Airports & Airlines Analysis"),
   tags$head(tags$link(rel="shortcut icon", href="https://raw.githubusercontent.com/vaghulb1992/usa_airline_viz/master/www/airline_icon.ico")),
-  headerPanel("The best and worst airports and flight routes in USA"),
   leafletOutput("airport_map", height = 450),
   br(),
   sidebarPanel(
