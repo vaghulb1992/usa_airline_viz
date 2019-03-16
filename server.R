@@ -57,13 +57,16 @@ server <- function(input, output){
                                                                             ordering = FALSE, autoWidth = TRUE))})
 
     # preparing a separate dataframe to be used by the addPolylines function later as it works in a specific way
-    spatial_info <- data.frame(lat = numeric(), long = numeric(), group = numeric())
-    for (i in 1:nrow(cancellations))
-    {
-      spatial_info <- rbind(spatial_info, c(cancellations[i, ]$latOrigin, cancellations[i, ]$longOrigin, i))
-      spatial_info <- rbind(spatial_info, c(cancellations[i, ]$latDest, cancellations[i, ]$longDest, i))
-    }
-    colnames(spatial_info) <- c("lat", "long", "group")
+    can_df1 <- cancellations[, c("latOrigin", "longOrigin")]
+    can_df1$group <- seq(1:nrow(cancellations))
+    colnames(can_df1) <- c("lat", "long", "group")
+
+    can_df2 <- cancellations[, c("latDest", "longDest")]
+    can_df2$group <- seq(1:nrow(cancellations))
+    colnames(can_df2) <- c("lat", "long", "group")
+
+    spatial_info <- rbind(can_df1, can_df2)
+    spatial_info <- spatial_info[order(spatial_info$group), ]
 
     # preparing the colour palette for the pseudo-heatmaps
     airport_pal <- colorNumeric(
@@ -106,9 +109,9 @@ server <- function(input, output){
     }
 
     # adding legends to make life easier
-    map_leaflet <- addLegend(map_leaflet, "topright", pal = airport_pal, values = airports$propCancelled,
-                             title = "Proportion of flights cancelled<br>per airport", opacity = 0.5)
-    map_leaflet <- addLegend(map_leaflet, "bottomright", pal = journey_pal, values = cancellations$propCancelled,
+    map_leaflet <- addLegend(map_leaflet, "bottomright", pal = airport_pal, values = airports$propCancelled,
+                             title = "Proportion of flights cancelled<br>per airport", opacity = 0.5, )
+    map_leaflet <- addLegend(map_leaflet, "bottomleft", pal = journey_pal, values = cancellations$propCancelled,
                              title = "Proportion of flights cancelled<br>per route", opacity = 0.5)
 
     # now we're done, time to display
